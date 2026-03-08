@@ -1,11 +1,683 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus</title>
-    </head>
-    <body>
-        PakePlus
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>温岭传祺电子报价单</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            color: #111111;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 20px 18px;
+            border-left: 1px solid #eaeaea;
+            border-right: 1px solid #eaeaea;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.02);
+            min-height: 100vh;
+        }
+
+        /* 首页标题样式 - 改为黑底白字，与查看报价按钮配色一致 */
+        .home-title {
+            font-size: 26px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+            margin-top: 8px;
+            color: white;
+            background: black;
+            border: 2px solid #000;
+            padding: 16px 12px;
+            line-height: 1.2;
+            text-align: center;
+            transition: 0.1s;
+        }
+        /* 点击效果 - 保持与按钮一致的反色效果 */
+        .home-title:active {
+            background: white;
+            color: black;
+        }
+        
+        /* 报价单标题区域 - 无下划线，水平对齐 */
+        .quote-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 20px;
+            margin-top: 8px;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .quote-title {
+            font-size: 22px;
+            font-weight: 500;
+            color: #000;
+            line-height: 1.2;
+        }
+        .quote-signature {
+            font-size: 14px;
+            font-weight: 400;
+            color: #3d3d3d;
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .selector-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .selector-label {
+            font-size: 14px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #5a5a5a;
+            margin-left: 2px;
+        }
+
+        .straight-select {
+            background: white;
+            border: 1px solid #ccc;
+            border-width: 0 0 2px 0;
+            padding: 12px 4px 8px 0;
+            font-size: 18px;
+            font-weight: 400;
+            color: #000;
+            outline: none;
+            width: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0 center;
+            background-size: 20px;
+        }
+        .straight-select:focus {
+            border-bottom-color: #000;
+        }
+
+        /* 提示小字 - 去掉左侧竖条装饰，只保留纯色背景 */
+        .scenario-hint {
+            font-size: 12px;
+            color: #6f6f6f;
+            background: #f7f7f7;
+            padding: 10px 12px;
+            margin-top: 4px;
+            line-height: 1.5;
+            border-radius: 0;
+            border-left: none;
+        }
+
+        /* 报价单底部的提示小字 - 浅灰色背景，与首页风格一致 */
+        .quote-footer-hint {
+            font-size: 12px;
+            color: #6f6f6f;
+            background: #f7f7f7;
+            padding: 12px 12px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            border-radius: 0;
+            border-left: none;
+        }
+
+        .primary-btn {
+            background: black;
+            color: white;
+            border: none;
+            padding: 18px 0;
+            font-size: 18px;
+            font-weight: 500;
+            width: 100%;
+            margin: 12px 0 0;
+            border: 2px solid black;
+            transition: 0.1s;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+        }
+        .primary-btn:active {
+            background: white;
+            color: black;
+        }
+
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+
+        /* 结果卡片 - 无上边框 */
+        .result-card {
+            margin-top: 10px;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #ececec;
+            font-size: 17px;
+            line-height: 1.2;
+        }
+        .result-label {
+            color: #3d3d3d;
+            font-weight: 400;
+        }
+        .result-value {
+            font-weight: 600;
+            color: #000;
+            font-feature-settings: "tnum";
+        }
+        /* 可编辑输入框样式 - 无边框背景，纯数字 */
+        .editable-input {
+            width: 130px;
+            text-align: right;
+            border: none;
+            padding: 0;
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+        }
+        /* 移除数字输入框的上下箭头 */
+        .editable-input::-webkit-outer-spin-button,
+        .editable-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .editable-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* 按揭范围提示 - 浅灰色背景，独立一行 */
+        .loan-range-note {
+            font-size: 12px;
+            color: #666;
+            background-color: #f5f5f5;
+            padding: 6px 10px;
+            margin-top: -4px;
+            margin-bottom: 10px;
+            border-radius: 0;
+            font-style: normal;
+        }
+
+        /* 金额数字后面的单位样式 */
+        .unit {
+            font-weight: 400;
+            color: #777;
+            margin-left: 2px;
+            font-size: 14px;
+        }
+        /* 为静态金额添加单位 */
+        .result-value .unit {
+            font-weight: 400;
+        }
+        /* 为输入框后面的单位单独处理 */
+        .input-unit {
+            font-weight: 400;
+            color: #777;
+            font-size: 14px;
+            margin-left: 4px;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            background: #f4f4f4;
+            padding: 12px 10px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            border-left: 3px solid black;
+        }
+        .back-link {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            text-align: left;
+        }
+        .back-btn {
+            background: none;
+            border: 2px solid #aaa;
+            padding: 14px 0;
+            width: 100%;
+            font-weight: 500;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+        }
+        .back-btn:active {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+<div class="app" id="appContainer">
+
+    <!-- 首页 选择面板 -->
+    <div id="homePage" class="page active">
+        <!-- 标题已改为黑底白字 -->
+        <div class="home-title">温岭传祺4S店 / 方广禄</div>
+        <div class="selector-group">
+            <div class="selector-item">
+                <span class="selector-label">车型</span>
+                <select id="modelSelect" class="straight-select"></select>
+            </div>
+            <div class="selector-item">
+                <span class="selector-label">车型配置</span>
+                <select id="trimSelect" class="straight-select"></select>
+            </div>
+            <div class="selector-item">
+                <span class="selector-label">付款方式</span>
+                <select id="paymentSelect" class="straight-select">
+                    <option value="全款">全款</option>
+                    <option value="5免2">5免2</option>
+                    <option value="汇理">汇理</option>
+                    <option value="本地按揭">本地按揭</option>
+                </select>
+            </div>
+            <div class="selector-item">
+                <span class="selector-label">购车情况</span>
+                <select id="scenarioSelect" class="straight-select">
+                    <option value="首次购车">首次购车</option>
+                    <option value="旧车置换新车">旧车置换新车</option>
+                    <option value="旧车报废换新车">旧车报废换新车</option>
+                </select>
+                <!-- 标注信息 -->
+                <div class="scenario-hint">
+                    · 旧车置换新车：旧车必须2025年1月8日之前已经在购车人名下<br>
+                    · 旧车报废换新车：旧车注册登记日期须在2013年6月30日之前
+                </div>
+            </div>
+        </div>
+        <button class="primary-btn" id="quoteBtn">查看报价</button>
+    </div>
+
+    <!-- 结果页面 -->
+    <div id="resultPage" class="page">
+        <!-- 标题区：水平对齐，无下划线 -->
+        <div class="quote-header">
+            <span class="quote-title">报价单</span>
+            <span class="quote-signature">@方广禄</span>
+        </div>
+
+        <!-- 显示当前选择摘要 -->
+        <div class="summary-line" id="summaryLine">
+            <span></span><span></span>
+        </div>
+
+        <div id="resultContent" class="result-card">
+            <!-- 动态JS填充行 -->
+        </div>
+
+        <!-- 报价单底部提示信息 - 与首页风格一致 -->
+        <div class="quote-footer-hint">
+            · 旧车置换新车：旧车必须2025年1月8日之前已经在购车人名下<br>
+            · 旧车报废换新车：旧车注册登记日期须在2013年6月30日之前
+        </div>
+
+        <div class="back-link">
+            <button class="back-btn" id="backHomeBtn">← 重新选择</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 原始数据 ----------
+        const rawRows = [
+            {车型: "GS3影速", 车型配置: "GS3影速 劲智版", 指导价: 99800, 优惠幅度: 16000, 厂补: 0, 预估保险费: 5000},
+            {车型: "GS3影速", 车型配置: "GS3影速 劲享版", 指导价: 89800, 优惠幅度: 16000, 厂补: 0, 预估保险费: 5000},
+            {车型: "GS3影速", 车型配置: "GS3影速 劲取版", 指导价: 79800, 优惠幅度: 16000, 厂补: 0, 预估保险费: 5000},
+            {车型: "GS4 MAX", 车型配置: "GS4 MAX 领航版", 指导价: 115800, 优惠幅度: 23000, 厂补: 0, 预估保险费: 5000},
+            {车型: "GS4 MAX", 车型配置: "GS4 MAX 旗舰版", 指导价: 125800, 优惠幅度: 23000, 厂补: 0, 预估保险费: 5000},
+            {车型: "影豹", 车型配置: "影豹 1.5T R-style版", 指导价: 128000, 优惠幅度: 20000, 厂补: 0, 预估保险费: 5000},
+            {车型: "影豹", 车型配置: "影豹 1.5T R-style劲享版", 指导价: 118000, 优惠幅度: 20000, 厂补: 0, 预估保险费: 5000},
+            {车型: "影豹", 车型配置: "影豹 2.0T R MAX", 指导价: 158000, 优惠幅度: 10000, 厂补: 0, 预估保险费: 5500},
+            {车型: "影豹", 车型配置: "影豹 2.0T R PRO", 指导价: 138000, 优惠幅度: 10000, 厂补: 0, 预估保险费: 5500},
+            {车型: "M6", 车型配置: "M6 PRO尊享", 指导价: 139800, 优惠幅度: 23000, 厂补: 6000, 预估保险费: 5500},
+            {车型: "M6", 车型配置: "M6 PRO豪华", 指导价: 129800, 优惠幅度: 23000, 厂补: 6000, 预估保险费: 5300},
+            {车型: "M6", 车型配置: "M6 PRO精英", 指导价: 119800, 优惠幅度: 23000, 厂补: 6000, 预估保险费: 5300},
+            {车型: "M6", 车型配置: "M6 MAX 豪华", 指导价: 132800, 优惠幅度: 23000, 厂补: 6000, 预估保险费: 5500},
+            {车型: "GS8", 车型配置: "GS8 七座四驱", 指导价: 205800, 优惠幅度: 15000, 厂补: 13000, 预估保险费: 6000},
+            {车型: "GS8", 车型配置: "GS8 七座两驱", 指导价: 186800, 优惠幅度: 15000, 厂补: 13000, 预估保险费: 6000},
+            {车型: "GS8", 车型配置: "GS8 五座四驱", 指导价: 172800, 优惠幅度: 15000, 厂补: 13000, 预估保险费: 5600},
+            {车型: "GS8", 车型配置: "GS8 五座两驱", 指导价: 159800, 优惠幅度: 15000, 厂补: 13000, 预估保险费: 5500},
+            {车型: "E8 PHEV", 车型配置: "E8 PHEV MAX（插混）", 指导价: 232800, 优惠幅度: 20000, 厂补: 0, 预估保险费: 6500},
+            {车型: "E8 HEV", 车型配置: "E8 HEV 荣耀（油混）", 指导价: 179800, 优惠幅度: 8000, 厂补: 8000, 预估保险费: 6000},
+            {车型: "向往S7", 车型配置: "向往S7 四驱激光雷达版", 指导价: 229800, 优惠幅度: 15000, 厂补: 0, 预估保险费: 6500},
+            {车型: "向往S7", 车型配置: "向往S7 四驱版", 指导价: 209800, 优惠幅度: 15000, 厂补: 0, 预估保险费: 6500},
+            {车型: "向往S7", 车型配置: "向往S7 Max 激光雷达版", 指导价: 215800, 优惠幅度: 15000, 厂补: 0, 预估保险费: 6000},
+            {车型: "向往S7", 车型配置: "向往S7 Max 智驾版", 指导价: 208800, 优惠幅度: 15000, 厂补: 0, 预估保险费: 6000},
+            {车型: "向往S7", 车型配置: "向往S7 Max版", 指导价: 195800, 优惠幅度: 15000, 厂补: 0, 预估保险费: 6000},
+            {车型: "向往S7", 车型配置: "向往S7 Pro+激光雷达版", 指导价: 179800, 优惠幅度: 6000, 厂补: 0, 预估保险费: 5800},
+            {车型: "向往S7", 车型配置: "向往S7 Pro+", 指导价: 159800, 优惠幅度: 6000, 厂补: 0, 预估保险费: 5800},
+            {车型: "向往S9", 车型配置: "向往S9 MAX (五座)", 指导价: 229900, 优惠幅度: 10000, 厂补: 0, 预估保险费: 6300},
+            {车型: "向往S9", 车型配置: "向往S9 Ultra (五座)", 指导价: 249900, 优惠幅度: 10000, 厂补: 0, 预估保险费: 6500},
+            {车型: "向往S9", 车型配置: "向往S9 MAX (选装六座)", 指导价: 239900, 优惠幅度: 10000, 厂补: 0, 预估保险费: 6500},
+            {车型: "向往S9", 车型配置: "向往S9 Ultra (选装六座)", 指导价: 259900, 优惠幅度: 10000, 厂补: 0, 预估保险费: 6500},
+            {车型: "向往M8", 车型配置: "向往M8 乾崑 Ultra 头等舱", 指导价: 389900, 优惠幅度: 0, 厂补: 8000, 预估保险费: 9000},
+            {车型: "向往M8", 车型配置: "向往M8 乾崑 Max 奢享舱", 指导价: 349900, 优惠幅度: 0, 厂补: 8000, 预估保险费: 9000},
+            {车型: "向往M8", 车型配置: "向往M8 鸿蒙座舱版", 指导价: 309900, 优惠幅度: 0, 厂补: 8000, 预估保险费: 8000},
+            {车型: "向往M8", 车型配置: "向往M8 宗师 激光雷达版", 指导价: 289900, 优惠幅度: 0, 厂补: 8000, 预估保险费: 7000},
+            {车型: "向往M8", 车型配置: "向往M8 宗师 尊享版", 指导价: 269900, 优惠幅度: 0, 厂补: 8000, 预估保险费: 7000},
+            {车型: "M8大师", 车型配置: "M8大师 尊贵（纯油）", 指导价: 229800, 优惠幅度: 30000, 厂补: 13000, 预估保险费: 6300},
+            {车型: "M8宗师HEV", 车型配置: "M8宗师HEV 至尊", 指导价: 239800, 优惠幅度: 0, 厂补: 10000, 预估保险费: 6500},
+            {车型: "M8宗师HEV", 车型配置: "M8宗师HEV 尊贵", 指导价: 219800, 优惠幅度: 0, 厂补: 10000, 预估保险费: 6500}
+        ];
+
+        const allModels = [...new Set(rawRows.map(r => r.车型))].sort();
+        let currentTrims = [];
+
+        // DOM
+        const homePage = document.getElementById('homePage');
+        const resultPage = document.getElementById('resultPage');
+        const modelSelect = document.getElementById('modelSelect');
+        const trimSelect = document.getElementById('trimSelect');
+        const paymentSelect = document.getElementById('paymentSelect');
+        const scenarioSelect = document.getElementById('scenarioSelect');
+        const quoteBtn = document.getElementById('quoteBtn');
+        const backBtn = document.getElementById('backHomeBtn');
+        const resultContent = document.getElementById('resultContent');
+        const summaryLine = document.getElementById('summaryLine');
+
+        // 辅助函数
+        function populateModels() {
+            modelSelect.innerHTML = '';
+            allModels.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                modelSelect.appendChild(opt);
+            });
+            onModelChange();
+        }
+
+        function onModelChange() {
+            const selectedModel = modelSelect.value;
+            const filtered = rawRows.filter(r => r.车型 === selectedModel);
+            currentTrims = filtered;
+            trimSelect.innerHTML = '';
+            filtered.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.车型配置;
+                opt.textContent = `${t.车型配置}  (¥${t.指导价})`;
+                opt.setAttribute('data-price', t.指导价);
+                trimSelect.appendChild(opt);
+            });
+        }
+
+        modelSelect.addEventListener('change', onModelChange);
+
+        function getSelectedTrimData() {
+            const selectedTrimName = trimSelect.value;
+            return rawRows.find(r => r.车型配置 === selectedTrimName) || null;
+        }
+
+        // 新能源判断
+        function isNewEnergyType(车型名) {
+            return ['向往M8', 'E8 PHEV', '向往S7', '向往S9'].includes(车型名);
+        }
+
+        // 裸价计算
+        function computeNakedPrice(指导价, 优惠, 厂补, scenario) {
+            if (scenario === '首次购车') return 指导价 - 优惠;
+            return 指导价 - 优惠 - 厂补;
+        }
+
+        // 购置税
+        function calcTax(裸价, 车型名) {
+            return isNewEnergyType(车型名) ? Math.round(裸价 / 11.3 / 2) : Math.round(裸价 / 11.3);
+        }
+
+        // 省补后返
+        function calcProvinceSubsidy(裸价, 车型名) {
+            if (isNewEnergyType(车型名)) return Math.min(Math.round(裸价 * 0.08), 15000);
+            else return Math.min(Math.round(裸价 * 0.06), 13000);
+        }
+        // 国补后返
+        function calcNationalSubsidy(裸价, 车型名) {
+            if (isNewEnergyType(车型名)) return Math.min(Math.round(裸价 * 0.12), 20000);
+            else return Math.min(Math.round(裸价 * 0.10), 15000);
+        }
+
+        // 按揭范围（仅用于提示，不限制输入）
+        function getLoanRange(裸价) {
+            const min = 30000;
+            const max = Math.floor(裸价 * 0.9);
+            return { min, max };
+        }
+
+        // 月供计算
+        function monthlyLoan(loan, paymentType) {
+            if (paymentType === '本地按揭') return Math.round(loan * 1.16 / 60);
+            if (paymentType === '汇理') return Math.round(loan * 1.245 / 60);
+            return 0;
+        }
+        function monthly5m2First(loan) { return Math.round(loan / 60); }
+        function monthly5m2Last(loan) { return Math.round(loan * 1.175 / 60); }
+
+        // 默认按揭金额
+        function getDefaultLoanAmount(裸价) {
+            const { min, max } = getLoanRange(裸价);
+            return Math.min(max, Math.max(min, Math.floor(裸价 * 0.5)));
+        }
+
+        // 存储当前状态
+        let currentState = {};
+
+        // 渲染结果页面（带单位“元”）
+        function renderResult() {
+            const trim = getSelectedTrimData();
+            if (!trim) return;
+            
+            const payment = paymentSelect.value;
+            const scenario = scenarioSelect.value;
+            const 车型名 = trim.车型;
+
+            // 初始化状态（如果还没有）
+            if (!currentState[trim.车型配置]) {
+                const default优惠 = trim.优惠幅度;
+                const default厂补 = (scenario !== '首次购车' ? trim.厂补 : 0);
+                const default裸价 = computeNakedPrice(trim.指导价, default优惠, default厂补, scenario);
+                currentState[trim.车型配置] = {
+                    优惠: default优惠,
+                    厂补: default厂补,
+                    预估保险费: trim.预估保险费,
+                    按揭金额: getDefaultLoanAmount(default裸价)
+                };
+            }
+
+            const state = currentState[trim.车型配置];
+
+            // 更新裸价
+            const current裸价 = computeNakedPrice(trim.指导价, state.优惠, state.厂补, scenario);
+            
+            // 计算所有值
+            const 购置税 = calcTax(current裸价, 车型名);
+            const 落地价 = current裸价 + 购置税 + state.预估保险费;
+            const 省补后返 = calcProvinceSubsidy(current裸价, 车型名);
+            const 国补后返 = calcNationalSubsidy(current裸价, 车型名);
+            
+            // 省补后落地价 = 落地价 - 省补后返
+            const 省补后落地价 = 落地价 - 省补后返;
+            // 国补后落地价 = 落地价 - 国补后返
+            const 国补后落地价 = 落地价 - 国补后返;
+            
+            const 车款首付 = current裸价 - state.按揭金额;
+            const 落地首付 = 落地价 - state.按揭金额;
+
+            let 月供 = 0, 前2年月供 = 0, 后3年月供 = 0;
+            if (payment === '本地按揭' || payment === '汇理') {
+                月供 = monthlyLoan(state.按揭金额, payment);
+            } else if (payment === '5免2') {
+                前2年月供 = monthly5m2First(state.按揭金额);
+                后3年月供 = monthly5m2Last(state.按揭金额);
+            }
+
+            // 按揭范围（仅用于提示）
+            const range = getLoanRange(current裸价);
+
+            // 顺序规则
+            const keyOrderMap = {
+                '全款+首次购车':              ['指导价','优惠','裸价','购置税','预估保险费','落地价'],
+                '全款+旧车置换新车':          ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','省补（后返）','省补后落地价'],
+                '全款+旧车报废换新车':        ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','国补（后返）','国补后落地价'],
+                '5免2+首次购车':              ['指导价','优惠','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','前2年月供','后3年月供'],
+                '5免2+旧车置换新车':          ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','省补（后返）','前2年月供','后3年月供'],
+                '5免2+旧车报废换新车':        ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','国补（后返）','前2年月供','后3年月供'],
+                '汇理+首次购车':              ['指导价','优惠','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','月供'],
+                '汇理+旧车置换新车':          ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','省补（后返）','月供'],
+                '汇理+旧车报废换新车':        ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','国补（后返）','月供'],
+                '本地按揭+首次购车':          ['指导价','优惠','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','月供'],
+                '本地按揭+旧车置换新车':      ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','省补（后返）','月供'],
+                '本地按揭+旧车报废换新车':    ['指导价','优惠','厂补','裸价','购置税','预估保险费','落地价','按揭金额','车款首付','落地首付','国补（后返）','月供'],
+            };
+            const key = payment + '+' + scenario;
+            const order = keyOrderMap[key] || [];
+
+            // 构建HTML（所有数字后面加“元”）
+            function buildHtml() {
+                let html = '';
+                
+                order.forEach(k => {
+                    if (k === '指导价') {
+                        html += `<div class="result-row"><span class="result-label">指导价</span><span class="result-value">${trim.指导价.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '优惠') {
+                        html += `<div class="result-row"><span class="result-label">优惠</span><div style="display: flex; align-items: center;"><input type="number" class="editable-input" data-key="优惠" value="${state.优惠}" step="100" inputmode="numeric"><span class="input-unit">元</span></div></div>`;
+                    }
+                    else if (k === '厂补') {
+                        html += `<div class="result-row"><span class="result-label">厂补</span><div style="display: flex; align-items: center;"><input type="number" class="editable-input" data-key="厂补" value="${state.厂补}" step="100" inputmode="numeric"><span class="input-unit">元</span></div></div>`;
+                    }
+                    else if (k === '裸价') {
+                        html += `<div class="result-row"><span class="result-label">裸价</span><span class="result-value">${current裸价.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '购置税') {
+                        html += `<div class="result-row"><span class="result-label">购置税</span><span class="result-value">${购置税.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '预估保险费') {
+                        html += `<div class="result-row"><span class="result-label">预估保险费</span><div style="display: flex; align-items: center;"><input type="number" class="editable-input" data-key="预估保险费" value="${state.预估保险费}" step="100" inputmode="numeric"><span class="input-unit">元</span></div></div>`;
+                    }
+                    else if (k === '落地价') {
+                        html += `<div class="result-row"><span class="result-label">落地价</span><span class="result-value">${落地价.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '省补（后返）') {
+                        html += `<div class="result-row"><span class="result-label">省补（后返）</span><span class="result-value">${省补后返.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '国补（后返）') {
+                        html += `<div class="result-row"><span class="result-label">国补（后返）</span><span class="result-value">${国补后返.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '省补后落地价') {
+                        html += `<div class="result-row"><span class="result-label">省补后落地价</span><span class="result-value">${省补后落地价.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '国补后落地价') {
+                        html += `<div class="result-row"><span class="result-label">国补后落地价</span><span class="result-value">${国补后落地价.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '按揭金额') {
+                        html += `<div class="result-row"><span class="result-label">按揭金额</span><div style="display: flex; align-items: center;"><input type="number" class="editable-input" data-key="按揭金额" value="${state.按揭金额}" step="100" inputmode="numeric"><span class="input-unit">元</span></div></div>`;
+                        // 范围提示独立一行，浅灰色背景
+                        html += `<div class="loan-range-note">建议范围: ${range.min.toLocaleString()} ~ ${range.max.toLocaleString()} 元</div>`;
+                    }
+                    else if (k === '车款首付') {
+                        html += `<div class="result-row"><span class="result-label">车款首付</span><span class="result-value">${车款首付.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '落地首付') {
+                        html += `<div class="result-row"><span class="result-label">落地首付</span><span class="result-value">${落地首付.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '月供') {
+                        html += `<div class="result-row"><span class="result-label">月供</span><span class="result-value">${月供.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '前2年月供') {
+                        html += `<div class="result-row"><span class="result-label">前2年月供</span><span class="result-value">${前2年月供.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                    else if (k === '后3年月供') {
+                        html += `<div class="result-row"><span class="result-label">后3年月供</span><span class="result-value">${后3年月供.toLocaleString()}<span class="unit">元</span></span></div>`;
+                    }
+                });
+
+                return html;
+            }
+
+            resultContent.innerHTML = buildHtml();
+            summaryLine.innerHTML = `<span>${trim.车型配置}</span><span>${payment} · ${scenario}</span>`;
+
+            // 绑定change事件（输入完成失去焦点时触发）
+            document.querySelectorAll('.editable-input').forEach(inp => {
+                inp.addEventListener('change', function(e) {
+                    const k = this.dataset.key;
+                    let newVal = parseInt(this.value, 10);
+                    
+                    // 处理NaN情况
+                    if (isNaN(newVal)) {
+                        newVal = 0;
+                    }
+                    
+                    if (k === '优惠') {
+                        state.优惠 = newVal;
+                    } else if (k === '厂补') {
+                        state.厂补 = newVal;
+                    } else if (k === '预估保险费') {
+                        state.预估保险费 = newVal;
+                    } else if (k === '按揭金额') {
+                        state.按揭金额 = newVal;
+                    }
+                    
+                    // 输入完成后重绘
+                    renderResult();
+                });
+            });
+        }
+
+        // 跳转到结果
+        quoteBtn.onclick = function() {
+            if (!trimSelect.value) { 
+                alert('请选择车型配置'); 
+                return; 
+            }
+            // 清除当前状态，重新开始
+            currentState = {};
+            renderResult();
+            homePage.classList.remove('active');
+            resultPage.classList.add('active');
+        };
+
+        backBtn.onclick = function() {
+            resultPage.classList.remove('active');
+            homePage.classList.add('active');
+        };
+
+        // 初始化
+        populateModels();
+        setTimeout(() => onModelChange(), 10);
+    })();
+</script>
+</body>
 </html>
